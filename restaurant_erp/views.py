@@ -10,17 +10,36 @@ from django.contrib.auth.decorators import login_required
 from decimal import Decimal
 # from bson.decimal128 import Decimal128
 from django.http import HttpResponse
+from django.shortcuts import render, redirect
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib import messages
+from django.contrib.auth.models import Group
 #  Login Redirect 
 from django.contrib.auth.forms import AuthenticationForm
 def login_view(request):
-    form = AuthenticationForm(request, data=request.POST or None)
-    if request.method == "POST":
+    if request.method == 'POST':
+        form = AuthenticationForm(request, data=request.POST)
         if form.is_valid():
             user = form.get_user()
-            login(request, user)
-            return redirect("dashboard")
-    return render(request, "login.html", {"form": form})
-
+            login(request, user)  # User ko login karwaya
+            
+            # Ab check karenge ki user kis group ka hai aur use wahi bhejenge
+            if user.is_superuser or user.groups.filter(name='Owner').exists():
+                return redirect('owner_dashboard')
+            elif user.groups.filter(name='Manager').exists():
+                return redirect('manager_dashboard')
+            elif user.groups.filter(name='Chef').exists():
+                return redirect('chef_dashboard')
+            elif user.groups.filter(name='Waiter').exists():
+                return redirect('waiter_dashboard')
+            else:
+                # Agar koi naya normal user hai jiska koi group nahi hai
+                return redirect('owner_dashboard')
+        else:
+            print("LOGIN FORM ERRORS:", form.errors) # Terminal me error dekhne ke liye
+    else:
+        form = AuthenticationForm()
+    return render(request, 'login.html', {'form': form})
 @login_required
 def logout_view(request):
     logout(request)
@@ -37,21 +56,19 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 
 @login_required
+@login_required
 def dashboard_redirect(request):
-    """Redirect user to their role-based dashboard"""
     user = request.user
     if user.is_superuser or user.groups.filter(name='Owner').exists():
         return redirect('owner_dashboard')
     elif user.groups.filter(name='Manager').exists():
         return redirect('manager_dashboard')
-    elif user.groups.filter(name='Waiter').exists():
-        return redirect('waiter_dashboard')
     elif user.groups.filter(name='Chef').exists():
         return redirect('chef_dashboard')
-    else:
-        # Default fallback dashboard
+    elif user.groups.filter(name='Waiter').exists():
         return redirect('waiter_dashboard')
-
+    else:
+        return redirect('home')
 
 # Individual Dashboards
 @login_required
@@ -435,3 +452,28 @@ def reports_dashboard(request):
         "low_stock": low_stock,
     }
     return render(request, "reports_dashboard.html", context)
+
+from django.contrib.auth.models import Group
+
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib import messages
+from django.shortcuts import render, redirect
+
+def register_view(request):
+    if request.method == 'POST':
+        form = UserCreationForm(request.POST)
+        selected_role = request.POST.get('role')  # Dropdown se role ki value aayegi
+        
+        if form.is_valid():
+            user = form.save()  # Naya user ban gaya
+            
+            # User ko uske selected group mein add kar denge
+            if selected_role:
+                group, created = Group.objects.get_or_create(name=selected_role)
+                user.groups.add(group)
+                
+            messages.success(request, 'Account created successfully! You can now login.')
+            return redirect('login')
+    else:
+        form = UserCreationForm()
+    return render(request, 'register.html', {'form': form})

@@ -36,28 +36,29 @@ TEMPLATES = [
 ]
 
 INSTALLED_APPS = [
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
+    'django_mongodb_backend',
+    'restaurant_erp.apps.MongoAdminConfig',
+    'restaurant_erp.apps.MongoAuthConfig',
+    'restaurant_erp.apps.MongoContentTypesConfig',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'cloudinary_storage',
     'cloudinary',
-    'restaurant_erp.apps.CoreConfig', 
+    'restaurant_erp.apps.CoreConfig',
 ]
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
+import django_mongodb_backend
 
+DATABASES = {
+    'default': django_mongodb_backend.parse_uri(
+        'mongodb+srv://mishrasoumya951_db_user:soumyamishra@cluster0.jbc02ot.mongodb.net/restaurant_db?retryWrites=true&w=majority'
+    )
+}
 MEDIA_URL = '/media/'
 STATIC_URL = '/static/'
-DEBUG = False
-ALLOWED_HOSTS = ['.onrender.com', 'localhost', '127.0.0.1']
+DEBUG = True
+ALLOWED_HOSTS =  ['*']
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
@@ -88,3 +89,8 @@ cloudinary.config(
     api_secret=CLOUDINARY_STORAGE['API_SECRET'],
     secure=True
 )
+
+DEFAULT_AUTO_FIELD = 'django_mongodb_backend.fields.ObjectIdAutoField'
+
+LOGIN_URL = '/login/'
+LOGIN_REDIRECT_URL = '/dashboard-redirect/'

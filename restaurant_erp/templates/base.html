@@ -25,7 +25,7 @@
             {% endif %}
 
             {% if user.is_authenticated %}
-                {% if user|has_group:"Owner" %}
+                {% if user.is_superuser or user|has_group:"Owner" %}
                     <li><a href="{% url 'dashboard' %}">📊 Dashboard</a></li>
                     <li><a href="{% url 'employee_list' %}">👨‍💼 Employees Management </a></li>
                     <li><a href="{% url 'menu_list' %}">🍽️ Menu Management</a></li>
@@ -35,18 +35,18 @@
                     <li><a href="{% url 'reports_dashboard' %}">📈 Reports </a></li>
                     
                 {% elif user|has_group:"Manager" %}
-                  <li><a href="{% url 'dashboard' %}">📊 Dashboard</a></li>
+                    <li><a href="{% url 'dashboard' %}">📊 Dashboard</a></li>
                     <li><a href="{% url 'employee_list' %}">👨‍💼 Employees Management</a></li>
                     <li><a href="{% url 'menu_list' %}">🍽️ Menu Management</a></li>
                     <li><a href="{% url 'inventory_list' %}">🥕 Inventory Management</a></li>
                     <li><a href="{% url 'reports_dashboard' %}">📈 Reports</a></li>
                 {% elif user|has_group:"Waiter" %}
-                  <li><a href="{% url 'dashboard' %}">📊 Dashboard</a></li>
-                <li><a href="{% url 'menu_list' %}">🍽️ Menu Management</a></li>
-                <li><a href="{% url 'order_list' %}">🧾 Orders Management</a></li>
+                    <li><a href="{% url 'dashboard' %}">📊 Dashboard</a></li>
+                    <li><a href="{% url 'menu_list' %}">🍽️ Menu Management</a></li>
+                    <li><a href="{% url 'order_list' %}">🧾 Orders Management</a></li>
                 {% elif user|has_group:"Chef" %}
-                  <li><a href="{% url 'dashboard' %}">📊 Dashboard</a></li>
-                <li><a href="{% url 'kitchen_dashboard' %}">👩🏻‍🍳Kitchen Management</a></li>
+                    <li><a href="{% url 'dashboard' %}">📊 Dashboard</a></li>
+                    <li><a href="{% url 'kitchen_dashboard' %}">👩🏻‍🍳 Kitchen Management</a></li>
                 {% endif %}
             {% endif %}
         </ul>

@@ -7,6 +7,14 @@
 
         <form method="POST">
             {% csrf_token %}
+            
+            <!-- 👇 Yeh line form ke theek niche jodi gayi hai taaki galat password ya username ka error saaf dikhe -->
+            {% if form.non_field_errors %}
+                <div class="alert alert-danger p-2 mb-3 small">
+                    {{ form.non_field_errors }}
+                </div>
+            {% endif %}
+
             {% for field in form %}
                 <div class="mb-3">
                     {{ field.label_tag }}
@@ -21,5 +29,9 @@
         </form>
 
     </div>
+</div>
+
+<div class="text-center mt-3">
+    <p>Don't have an account? <a href="{% url 'register' %}">Register here</a></p>
 </div>
 {% endblock %}
